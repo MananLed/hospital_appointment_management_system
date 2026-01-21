@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Cognito User Pool for Hospital Appointment System (Dev Test)
+
+Resources:
+  HospitalUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: hospital-user-pool-dev
+      UsernameAttributes:
+        - email
+
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+
+      Schema:
+        - Name: role
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+
+        - Name: department
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+
+      MfaConfiguration: 'OFF'
+
+  HospitalUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: hospital-user-pool-client-dev
+      UserPoolId: !Ref HospitalUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+Outputs:
+  UserPoolId:
+    Value: !Ref HospitalUserPool
+  UserPoolClientId:
+    Value: !Ref HospitalUserPoolClient
+
+
+
+# AWSTemplateFormatVersion: "2010-09-09"
+# Transform: AWS::Serverless-2016-10-31
+# Description: Hospital System - Free Tier Compatible User Pool (2026)
+
+# Resources:
+#   TokenGenerationTrigger:
+#     Type: AWS::Serverless::Function
+#     Properties:
+#       FunctionName: hospital-pre-token-trigger-dev
+#       Handler: index.lambda_handler
+#       Runtime: python3.12
+#       InlineCode: |
+#         def lambda_handler(event, context):
+#             user_attrs = event.get('request', {}).get('userAttributes', {})
+#             email = user_attrs.get('email', 'unknown')
+#             dept = user_attrs.get('custom:department', 'general')
+#             role = user_attrs.get('custom:role', 'guest')
+            
+#             # Populate the access token details
+#             event['response'] = {
+#                 "claimsAndScopeOverrideDetails": {
+#                     "accessTokenGeneration": {
+#                         "claimsToAddOrOverride": {
+#                             "email": email,
+#                             "department": dept,
+#                             "role": role
+#                         }
+#                     }
+#                 }
+#             }
+#             return event
+
+#   ConfigLambdaPermission:
+#     Type: AWS::Lambda::Permission
+#     Properties:
+#       Action: lambda:InvokeFunction
+#       FunctionName: !Ref TokenGenerationTrigger
+#       Principal: cognito-idp.amazonaws.com
+#       SourceArn: !GetAtt HospitalUserPool.Arn
+
+#   HospitalUserPool:
+#     Type: AWS::Cognito::UserPool
+#     Properties:
+#       UserPoolName: hospital-user-pool-dev
+#       UserPoolTier: ESSENTIALS # Explicitly set for Access Token Customization
+#       UsernameAttributes:
+#         - email
+#       AdminCreateUserConfig:
+#         AllowAdminCreateUserOnly: true
+      
+#       LambdaConfig:
+#         PreTokenGenerationConfig:
+#           LambdaArn: !GetAtt TokenGenerationTrigger.Arn
+#           LambdaVersion: V2_0 # Required version for Access Tokens
+
+#       Schema:
+#         - Name: role
+#           AttributeDataType: String
+#           Mutable: true
+#           Required: false
+#         - Name: department
+#           AttributeDataType: String
+#           Mutable: true
+#           Required: false
+
+#       Policies:
+#         PasswordPolicy:
+#           MinimumLength: 8
+#           RequireLowercase: true
+#           RequireUppercase: true
+#           RequireNumbers: true
+#           RequireSymbols: true
+
+#   HospitalUserPoolClient:
+#     Type: AWS::Cognito::UserPoolClient
+#     Properties:
+#       ClientName: hospital-user-pool-client-dev
+#       UserPoolId: !Ref HospitalUserPool
+#       GenerateSecret: false
+#       ExplicitAuthFlows:
+#         - ALLOW_USER_PASSWORD_AUTH
+#         - ALLOW_REFRESH_TOKEN_AUTH
+#       PreventUserExistenceErrors: ENABLED
+
+# Outputs:
+#   UserPoolId:
+#     Value: !Ref HospitalUserPool
+#   UserPoolClientId:
+#     Value: !Ref HospitalUserPoolClient
