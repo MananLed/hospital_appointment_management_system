@@ -15,7 +15,7 @@ class Response:
     @classmethod
     def error_response(cls, error_code: str, message: str):
         return {
-            "status": "fail",
+            "status": "Fail",
             "errorcode": error_code,
             "message": message,
         }
