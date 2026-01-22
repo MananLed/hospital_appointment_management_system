@@ -54,7 +54,7 @@ class UserRepository:
                             {"S": new_user.mobile},
                             {"S": new_user.password},
                             {"S": new_user.role.value},
-                            {"S": new_user.department or ""},
+                            {"S": str(new_user.department) if new_user.department else ""},
                         ],
                     },
                     {
@@ -68,12 +68,13 @@ class UserRepository:
                             {"S": new_user.mobile},
                             {"S": new_user.password},
                             {"S": new_user.role.value},
-                            {"S": new_user.department or ""},
+                            {"S": str(new_user.department) if new_user.department else ""},
                         ],
                     },
                 ],
             )
-        except Exception:
+        except Exception as e:
+            print(e)
             raise AppException(USER_006)
 
 

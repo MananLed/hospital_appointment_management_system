@@ -25,6 +25,10 @@ unauthorized_exception: ErrorDefinition = ErrorDefinition(
 
 
 ERROR_REGISTRY: Dict[str, ErrorDefinition] = {
+    HOSPITAL_001: ErrorDefinition(
+        http_status=status.HTTP_400_BAD_REQUEST,
+        message="Missing department value"
+    ),
     AUTH_001: ErrorDefinition(
         http_status=status.HTTP_401_UNAUTHORIZED,
         message="Authorization header missing or invalid"

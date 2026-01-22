@@ -6,10 +6,12 @@ from app.response.response import Response
 from app.errors.base_exception import AppException
 
 from app.controller.auth_controller import auth_router
+from app.controller.hospital_contoller import hospital_router
 
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(hospital_router)
 
 
 @app.get("/health")

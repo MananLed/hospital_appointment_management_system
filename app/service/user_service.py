@@ -26,14 +26,14 @@ class UserService:
             user.role = role
 
         try:
-            user: User = self.user_repository.get_user_by_email(user.email)
+            existing_user: User = self.user_repository.get_user_by_email(user.email)
         except AppException as exception:
             if exception.error_code == USER_005:
-                user = None
+                existing_user = None
             else:
                 raise exception
 
-        if user is not None:
+        if existing_user is not None:
             raise AppException(USER_002)
 
         try:

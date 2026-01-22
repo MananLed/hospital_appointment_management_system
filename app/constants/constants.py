@@ -20,4 +20,6 @@ USER_004: str = "USER_004"
 USER_005: str = "USER_005"
 USER_006: str = "USER_006"
 
+HOSPITAL_001: str = "HOSPITAL_001"
+
 SYS_001: str = "SYS_001"

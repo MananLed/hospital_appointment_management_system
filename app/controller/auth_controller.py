@@ -19,6 +19,7 @@ def login(login_details: LoginInput):
 def signup(signup_details: SignUpInput):
 
     signup_details.email = signup_details.email.lower()
+    signup_details.department = ""
     
     new_user: User = User.model_construct(**signup_details.model_dump())
 
