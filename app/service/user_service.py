@@ -1,15 +1,17 @@
 from app.repository.user_repository import UserRepository
-from app.models.user import User, UserRole
+from app.models.user import User, UserRole, Department
+from app.dto.user import AuthResponse
 from app.errors.base_exception import AppException
 from app.constants.constants import *
 from app.utils.hash_and_check_password import compare_hash_and_password, generate_hash_from_password
 from app.utils.jwt import create_jwt_token
+from typing import List
 
 class UserService:
     def __init__(self, user_repository_instance: UserRepository):
         self.user_repository = user_repository_instance
 
-    def get_user_by_email_and_password(self, email: str, password: str):
+    def get_user_by_email_and_password(self, email: str, password: str) -> AuthResponse:
 
         user: User = self.user_repository.get_user_by_email(email)
 
@@ -20,7 +22,7 @@ class UserService:
 
         return {"token": access_token, "email": user.email, "role": user.role}
     
-    def add_user(self, user: User, role: UserRole | None = None):
+    def add_user(self, user: User, role: UserRole | None = None) -> None:
 
         if role is not None:
             user.role = role
@@ -42,3 +44,7 @@ class UserService:
             raise AppException(USER_003)
 
         self.user_repository.add_user(user)
+
+    
+    def get_all_users_by_role(self, role: UserRole, department: Department | None = None) -> List[User]:
+        return self.user_repository.get_all_users_by_role(role, department)

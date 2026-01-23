@@ -1,5 +1,7 @@
-from app.repository import user_repository_instance
+from app.repository import user_repository_instance, appointment_repository_instance
 from app.service.user_service import UserService
+from app.service.appointment_service import AppointmentService
 
 
 user_service_instance = UserService(user_repository_instance)
+appointment_service_instance = AppointmentService(appointment_repository_instance)

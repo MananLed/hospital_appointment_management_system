@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
+from typing import TypedDict
+from app.models.user import UserRole, Department
 import re
 
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
@@ -28,7 +30,7 @@ class SignUpInput(BaseModel):
     password: str = Field(alias="password")
     name: str = Field(alias="name")
     mobile: str = Field(alias="mobile")
-    department: str | None = Field(alias="department", default=None)
+    department: Department | None = Field(alias="department", default=None)
 
     @field_validator("password")
     @classmethod
@@ -47,3 +49,8 @@ class SignUpInput(BaseModel):
                 "Password must contain uppercase, lowercase, digit, and special character"
             )
         return v
+
+class AuthResponse(TypedDict):
+    token: str
+    email: str
+    role: UserRole

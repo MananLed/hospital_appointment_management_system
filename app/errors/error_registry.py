@@ -10,7 +10,7 @@ class ErrorDefinition:
 
 db_exception: ErrorDefinition = ErrorDefinition(
     http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    message=SERVER_ERROR
+    message=DB_ERROR
 )
 
 sys_exception: ErrorDefinition = ErrorDefinition(
@@ -57,5 +57,7 @@ ERROR_REGISTRY: Dict[str, ErrorDefinition] = {
         message="Invalid Credentials"
     ),
     USER_006: sys_exception,
+    USER_007: db_exception,
+    APPOINTMENT_001: db_exception,
     SYS_001: sys_exception
 }

@@ -37,8 +37,3 @@ def add_receptionist(receptionist_details: SignUpInput):
     return Response.success_response(None, "Receptionist added successfully", status.HTTP_201_CREATED)
 
 
-@hospital_router.get("/users")
-def get_users_by_role():
-    ...
-
-

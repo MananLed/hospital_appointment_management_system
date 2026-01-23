@@ -10,9 +10,10 @@ class UserRole(str, Enum):
     ROLEPATIENT = "patient"
 
 class Department(str, Enum):
-    CARDIOLOGY = "CARDIOLOGY"
-    NUEROLOGY = "NUEROLOGY"
-    ENT = "ENT"
+    CARDIOLOGY = "cardiology"
+    NUEROLOGY = "nuerology"
+    ENT = "ent"
+    ORTHOPEDICS = "orthopedics"
 
 class User(BaseModel):
     model_config = ConfigDict(populate_by_name=True, str_strip_whitespace=True)
@@ -23,4 +24,4 @@ class User(BaseModel):
     name: str = Field(alias="name")
     mobile: str = Field(alias="mobile")
     department: Department | None = Field(alias="department", default=None)
-    role: UserRole = Field(default=UserRole.ROLEPATIENT, alias="role")
+    role: UserRole = Field(default=UserRole.ROLEPATIENT, alias="role", exclude=True)
