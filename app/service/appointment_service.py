@@ -71,6 +71,15 @@ class AppointmentService:
 
         self.appointment_repository.book_appointment(appointment)
 
+        self.sns_client.publish(
+            TopicArn=APPOINTMENT_NOTIFICATION_TOPIC_ARN,
+            Message=json.dumps({
+                "email": appointment.email,
+                "subject": "Appointment Scheduled",
+                "message": f"Your appointment with Dr. {appointment.doctor_name} at {appointment.timeslot} has been scheduled successfully."
+            })
+        )
+
     def get_all_appointments_of_doctor(self, id: UUID, appointment_date: date) -> List[Appointment]:
 
         return self.appointment_repository.get_all_appointments_of_doctor(id, appointment_date)
@@ -109,6 +118,20 @@ class AppointmentService:
             raise AppException(APPOINTMENT_018)
         
         self.appointment_repository.cancel_appointment(appointment_details)
+
+        if patient_id is not None:
+            message: str = f"You have successfully cancelled you appointment with Dr. {appointment_details.doctor_name} at {appointment_details.timeslot}."
+        else:
+            message: str = f"Due to some unavoidable circumstances your appointment with Dr. {appointment_details.doctor_name} at {appointment_details.timeslot} has been cancelled. We apologize for the inconvinience."
+
+        self.sns_client.publish(
+            TopicArn=APPOINTMENT_NOTIFICATION_TOPIC_ARN,
+            Message=json.dumps({
+                "email": appointment_details.email,
+                "subject": "Appointment Cancelled",
+                "message": message
+            })
+        )
 
     def mark_appointment_complete(self, doctor_id: UUID, appointment_date: date, timeslot: str):
         today = date.today()
