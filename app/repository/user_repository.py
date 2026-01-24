@@ -13,13 +13,13 @@ class UserRepository:
 
     def get_user_by_email(self, email: str) -> User:
         statement = (
-            f"SELECT * FROM {self.table_name} WHERE PK = ? AND begins_with(SK, ?)"
+            f"SELECT * FROM {self.table_name} WHERE PK = ?"
         )
 
         try:
             response = self.dynamodb.execute_statement(
                 Statement=statement,
-                Parameters=[{"S": "USERS"}, {"S": ("EMAIL#" + email)}],
+                Parameters=[{"S": ("USERS#EMAIL#" + email)}],
             )
         except Exception:
             raise AppException(USER_004)
@@ -48,8 +48,8 @@ class UserRepository:
                     {
                         "Statement": statement,
                         "Parameters": [
-                            {"S": "USERS"},
-                            {"S": ("EMAIL#" + new_user.email + "#UUID#" + new_user.id)},
+                            {"S": ("USERS#EMAIL#" + new_user.email)},
+                            {"S": ("UUID#" + new_user.id)},
                             {"S": new_user.id},
                             {"S": new_user.email},
                             {"S": new_user.name},
