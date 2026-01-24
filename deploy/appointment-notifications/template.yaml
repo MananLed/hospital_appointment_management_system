@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31 
+
+Globals:
+  Function:
+    Runtime: python3.14
+    Timeout: 200
+
+Parameters:
+  SourceEmail:
+    Type: String
+
+
+Resources:
+  
+  AppointmentNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: appointment-notifications
+
+  NotificationDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: appointment-notification-dlq
+  
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: appointment-notification-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt NotificationDLQ.Arn
+        maxReceiveCount: 3
+      VisibilityTimeout: 250
+
+    
+  SNSTOSQSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AppointmentNotificationTopic
+      Protocol: sqs
+      Endpoint: !GetAtt NotificationQueue.Arn 
+      RawMessageDelivery: true 
+
+  SQSPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow 
+            Principal: "*"
+            Action: sqs:SendMessage
+            Resource: !GetAtt NotificationQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref AppointmentNotificationTopic
+      Queues:
+        - !Ref NotificationQueue
+
+  NotificationLambda:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: appointment-email-notifier
+      CodeUri: notification-lambda/
+      Handler: app.handler
+      Policies:
+        - SESCrudPolicy:
+            IdentityName: "*"
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt NotificationQueue.Arn
+            BatchSize: 1
+      Environment:
+        Variables:
+          SOURCE_EMAIL: !Ref SourceEmail

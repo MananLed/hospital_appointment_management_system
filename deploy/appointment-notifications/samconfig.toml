@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "shankara-notify-service"
+resolve_s3 = true
+s3_prefix = "shankara-notify-service"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "SourceEmail=\"b220680@skit.ac.in\""
+image_repositories = []
+
+[default.global.parameters]
+region = "ap-south-1"

@@ -30,8 +30,18 @@ def app_exception_handler(request: Request, exc: AppException):
         ),
     )
 
+@app.exception_handler(ValueError)
+def value_error_exception_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        content=Response.error_response(
+            error_code=SYS_001,
+            message=str(exc)
+        )
+    )
+
 @app.exception_handler(RequestValidationError)
-def app_exception_handler(request: Request, exc: RequestValidationError):
+def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content=Response.error_response(

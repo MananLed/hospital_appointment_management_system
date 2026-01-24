@@ -46,5 +46,5 @@ class UserService:
         self.user_repository.add_user(user)
 
     
-    def get_all_users_by_role(self, role: UserRole, department: Department | None = None) -> List[User]:
-        return self.user_repository.get_all_users_by_role(role, department)
+    def get_all_users_by_role(self, role: UserRole, department: Department | None = None, id: str | None = None) -> List[User]:
+        return self.user_repository.get_all_users_by_role(role, department, id)

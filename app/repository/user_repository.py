@@ -79,7 +79,7 @@ class UserRepository:
             raise AppException(USER_006)
         
 
-    def get_all_users_by_role(self, role: UserRole, department: Department | None) -> List[User]:
+    def get_all_users_by_role(self, role: UserRole, department: Department | None = None, id: str | None = None) -> List[User]:
         try:
             if department is None:
                 response = self.dynamodb.execute_statement(
@@ -91,6 +91,18 @@ class UserRepository:
                     {"S": f"ROLE#{role.value.upper()}"}
                 ]
             )
+            elif department is not None and id is not None:
+                response = self.dynamodb.execute_statement(
+                    Statement=f"""
+                        SELECT * FROM {self.table_name}
+                        WHERE PK = ?
+                        AND begins_with(SK, ?)
+                    """,
+                    Parameters=[
+                        {"S": f"ROLE#{role.value.upper()}"},
+                        {"S": f"DEPARTMENT#{department.value}#UUID#{id}"}
+                    ]
+                )
             else:
                 response = self.dynamodb.execute_statement(
                     Statement=f"""
