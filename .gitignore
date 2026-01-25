@@ -17,6 +17,7 @@ parts/
 sdist/
 var/
 wheels/
+aws/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
