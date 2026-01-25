@@ -8,7 +8,7 @@ from app.constants.constants import *
 from app.errors.base_exception import AppException
 from fastapi import APIRouter, Depends, status, Query, Path, Request
 from app.models.appointment import Appointment
-from app.dto.appointment import DateQuery
+from app.dto.appointment import DateQuery, DateQueryDoctor
 from app.dependencies.authorization import require_roles
 from uuid import UUID
 
@@ -58,7 +58,7 @@ def book_appointment(id: Annotated[UUID, Path()], appointment_date: Annotated[Da
     return Response.success_response(None, "Appointment booked successfully", status.HTTP_201_CREATED)
 
 @appointment_router.get("/doctors/{id}/appointments", dependencies=[Depends(require_roles(UserRole.ROLERECEPTIONIST))])
-def get_all_appointments_of_doctor(id: Annotated[UUID, Path()], appointment_date: Annotated[DateQuery, Depends()]):
+def get_all_appointments_of_doctor(id: Annotated[UUID, Path()], appointment_date: Annotated[DateQueryDoctor, Depends()]):
 
     appointments: List[Appointment] = appointment_service_instance.get_all_appointments_of_doctor(id, appointment_date.appointment_date)
 

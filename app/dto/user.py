@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
-from typing import TypedDict
+from typing import TypedDict, Optional
 from app.models.user import UserRole, Department
 import re
 
@@ -30,7 +30,7 @@ class SignUpInput(BaseModel):
     password: str = Field(alias="password")
     name: str = Field(alias="name")
     mobile: str = Field(alias="mobile")
-    department: Department | None = Field(alias="department", default=None)
+    department: Optional[Department] = Field(alias="department", default=None)
 
     @field_validator("password")
     @classmethod
@@ -49,6 +49,12 @@ class SignUpInput(BaseModel):
                 "Password must contain uppercase, lowercase, digit, and special character"
             )
         return v
+    
+    @field_validator("department", mode="before")
+    @classmethod
+    def handle_empty_department(cls, v):
+        return None if v == "" else v
+
 
 class AuthResponse(TypedDict):
     token: str

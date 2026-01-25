@@ -120,7 +120,7 @@ class AppointmentService:
         self.appointment_repository.cancel_appointment(appointment_details)
 
         if patient_id is not None:
-            message: str = f"You have successfully cancelled you appointment with Dr. {appointment_details.doctor_name} at {appointment_details.timeslot}."
+            message: str = f"You have successfully cancelled your appointment with Dr. {appointment_details.doctor_name} at {appointment_details.timeslot}."
         else:
             message: str = f"Due to some unavoidable circumstances your appointment with Dr. {appointment_details.doctor_name} at {appointment_details.timeslot} has been cancelled. We apologize for the inconvinience."
 
@@ -162,7 +162,7 @@ class AppointmentService:
             Message=json.dumps({
                 "email": appointment_details.email,
                 "subject": "Appointment Completed",
-                "message": f"Your appointment with Dr. {appointment_details.doctor_name} for {appointment_details.timeslot}. Hope you liked it."
+                "message": f"Your appointment with Dr. {appointment_details.doctor_name} for {appointment_details.timeslot} is completed. Hope you liked it."
             })
         )
         

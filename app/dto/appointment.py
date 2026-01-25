@@ -26,6 +26,26 @@ class DateQuery(BaseModel):
             raise ValueError("Appointment date cannot be in the past")
 
         return parsed_date
+    
+class DateQueryDoctor(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, extra="forbid", str_strip_whitespace=True, validate_assignment=True)
+
+    appointment_date: date = Field(alias="appointment_date")
+
+    @field_validator("appointment_date", mode="before")
+    @classmethod
+    def validate_and_parse_date(cls, v):
+        if isinstance(v, str):
+            try:
+                parsed_date = datetime.strptime(v, "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Date must be in YYYY-MM-DD format and a valid calendar day")
+        elif isinstance(v, date):
+            parsed_date = v
+        else:
+            raise ValueError("Invalid date value")
+
+        return parsed_date
 
 
 class TimeSlot(TypedDict):
