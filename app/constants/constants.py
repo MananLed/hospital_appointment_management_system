@@ -1,10 +1,10 @@
-REGION: str = "ap-south-1"
-TABLE_NAME: str = "ShankaraHospitalTable"
+import os
+REGION = os.getenv("REGION")
+TABLE_NAME = os.getenv("TABLE_NAME")
+SECRETKEY = os.getenv("SECRETKEY")
+ALGORITHM = os.getenv("ALGORITHM")
+APPOINTMENT_NOTIFICATION_TOPIC_ARN = os.getenv("APPOINTMENT_NOTIFICATION_TOPIC_ARN")
 
-SECRETKEY: str = "ManLed123"
-ALGORITHM: str = "HS256"
-
-APPOINTMENT_NOTIFICATION_TOPIC_ARN: str = "arn:aws:sns:ap-south-1:876588303118:appointment-notifications"
 
 SERVER_ERROR: str = "Internal Server Error"
 INVALID_DETAILS: str = "Invalid Details"
@@ -58,5 +58,6 @@ APPOINTMENT_021: str = "APPOINTMENT_021"
 APPOINTMENT_022: str = "APPOINTMENT_022"
 APPOINTMENT_023: str = "APPOINTMENT_023"
 APPOINTMENT_024: str = "APPOINTMENT_024"
+APPOINTMENT_025: str = "APPOINTMENT_025"
 
 SYS_001: str = "SYS_001"

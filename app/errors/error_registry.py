@@ -130,5 +130,9 @@ ERROR_REGISTRY: Dict[str, ErrorDefinition] = {
         http_status=status.HTTP_403_FORBIDDEN,
         message="Completed request cannot be marked completed again"
     ),
+    APPOINTMENT_025: ErrorDefinition(
+        http_status=status.HTTP_403_FORBIDDEN,
+        message="Appointment past the time cannot be cancelled"
+    ),
     SYS_001: sys_exception
 }

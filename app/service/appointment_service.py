@@ -100,8 +100,12 @@ class AppointmentService:
 
         cancel_deadline = appointment_start - timedelta(hours=1)
 
-        if now_utc > cancel_deadline:
-            raise AppException(APPOINTMENT_016)
+        if now_utc > appointment_start:
+            raise AppException(APPOINTMENT_025)
+
+        if patient_id is not None:
+            if now_utc > cancel_deadline:
+                raise AppException(APPOINTMENT_016)
         
         appointments: List[Appointment] = self.appointment_repository.get_all_appointments_of_doctor(doctor_id, appointment_date, timeslot)
 

@@ -19,14 +19,26 @@ Parameters:
     Type: String
     Description: DynamoDB table ARN
 
-  SnsTopicArn:
-    Type: String
-    Description: SNS topic ARN
-
   CertificateArn:
     Type: String
     Default: ""
     Description: ACM Certificate ARN for HTTPS (optional)
+  
+  AppRegion:
+    Type: String
+    Default: "ap-south-1"
+
+  TableName:
+    Type: String
+    Default: "ShankaraHospitalTable"
+
+  JwtAlgorithm:
+    Type: String
+    Default: "HS256"
+
+  SnsTopicArn:
+    Type: String
+    Description: "ARN for SNS Appointment Notifications"
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, ""]]
@@ -52,6 +64,15 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+      - PolicyName: SsmAccessForSecrets
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameters
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shankara/prod/*"
 
   TaskRole:
     Type: AWS::IAM::Role
@@ -197,6 +218,18 @@ Resources:
       ContainerDefinitions:
         - Name: fastapi
           Image: !Ref ContainerImage
+          Environment:
+            - Name: REGION
+              Value: !Ref AppRegion
+            - Name: TABLE_NAME
+              Value: !Ref TableName
+            - Name: ALGORITHM 
+              Value: !Ref JwtAlgorithm
+            - Name: APPOINTMENT_NOTIFICATION_TOPIC_ARN
+              Value: !Ref SnsTopicArn
+          Secrets:
+            - Name: SECRETKEY
+              ValueFrom: "/shankara/prod/SECRET_KEY"
           Essential: true
           PortMappings:
             - ContainerPort: 8000
