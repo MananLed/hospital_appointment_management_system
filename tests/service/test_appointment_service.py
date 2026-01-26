@@ -233,7 +233,8 @@ class TestAppointmentService(unittest.TestCase):
             self.service.cancel_appointment(
                 doctor_id=self.doctor_id,
                 appointment_date=date.today(),
-                timeslot=late_timeslot
+                timeslot=late_timeslot,
+                patient_id="sfdljk"
             )
 
         self.assertEqual(ctx.exception.error_code, APPOINTMENT_016)
