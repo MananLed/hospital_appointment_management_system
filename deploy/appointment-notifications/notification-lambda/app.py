@@ -8,7 +8,7 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
 
 SMTP_USERNAME = os.environ["SOURCE_EMAIL"]
-SMTP_PASSWORD = "bewrqilqdvagbije"
+SMTP_PASSWORD = "*******************"
 
 FROM_EMAIL = SMTP_USERNAME
 
