@@ -2,10 +2,10 @@ from fastapi import Request
 from typing import Iterable
 from app.constants.constants import *
 from app.errors.base_exception import AppException
+from typing import Callable, Any, Dict
 
-
-def require_roles(*allowed_roles: Iterable[str]):
-    async def role_dependency(request: Request):
+def require_roles(*allowed_roles: Iterable[str]) -> Callable[[Request], Dict[str, Any]]:
+    def role_dependency(request: Request) -> Dict[str, Any]:
         claims = getattr(request.state, "user", None)
 
         if not claims:
