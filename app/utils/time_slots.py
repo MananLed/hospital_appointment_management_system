@@ -3,12 +3,15 @@ from app.dto.appointment import TimeSlot
 from typing import List
 from app.constants.constants import *
 
-def get_available_slots(appointment_date: date, local_tz_offset_hours=5.5) -> List[TimeSlot]:
+
+def get_available_slots(
+    appointment_date: date, local_tz_offset_hours=5.5
+) -> List[TimeSlot]:
     now_utc = datetime.now(timezone.utc)
 
     shifts = [
         (time(FIRST_SHIFT_START_TIME, 0), time(FIRST_SHIFT_END_TIME, 0)),
-        (time(SECOND_SHIFT_START_TIME, 0), time(SECOND_SHIFT_END_TIME, 0))
+        (time(SECOND_SHIFT_START_TIME, 0), time(SECOND_SHIFT_END_TIME, 0)),
     ]
 
     duration = timedelta(minutes=TIME_SLOT_INTERVAL)
@@ -23,19 +26,23 @@ def get_available_slots(appointment_date: date, local_tz_offset_hours=5.5) -> Li
             utc_start = current_time.astimezone(timezone.utc)
 
             if utc_start > now_utc:
-                available_slots.append({
-                    "start": utc_start.isoformat(),
-                    "end": (utc_start + duration).isoformat()
-                })
+                available_slots.append(
+                    {
+                        "start": utc_start.isoformat(),
+                        "end": (utc_start + duration).isoformat(),
+                    }
+                )
 
             current_time += duration
 
     return available_slots
 
-def filter_available_slots(all_slots: List[TimeSlot], occupied_timeslots: List[str]) -> List[TimeSlot]:
+
+def filter_available_slots(
+    all_slots: List[TimeSlot], occupied_timeslots: List[str]
+) -> List[TimeSlot]:
     occupied_set = {
-        datetime.fromisoformat(ts).astimezone(timezone.utc)
-        for ts in occupied_timeslots
+        datetime.fromisoformat(ts).astimezone(timezone.utc) for ts in occupied_timeslots
     }
 
     filtered = []
@@ -48,7 +55,6 @@ def filter_available_slots(all_slots: List[TimeSlot], occupied_timeslots: List[s
 
     return filtered
 
+
 def calculate_expires_at() -> int:
-    return int(
-        (datetime.now(timezone.utc) + timedelta(days=TTL_DAYS)).timestamp()
-    )
+    return int((datetime.now(timezone.utc) + timedelta(days=TTL_DAYS)).timestamp())

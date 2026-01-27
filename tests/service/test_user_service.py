@@ -20,10 +20,10 @@ class TestUserService(unittest.TestCase):
             id=str(uuid4()),
             name="Manan",
             email="test@example.com",
-            password="hashedpassword", 
+            password="hashedpassword",
             mobile="1234567890",
             role=UserRole.ROLEADMIN,
-            department=Department.CARDIOLOGY
+            department=Department.CARDIOLOGY,
         )
 
     def tearDown(self):
@@ -32,20 +32,27 @@ class TestUserService(unittest.TestCase):
 
     @patch("app.service.user_service.compare_hash_and_password")
     @patch("app.service.user_service.create_jwt_token")
-    def test_get_user_by_email_and_password_success(self, mock_create_jwt, mock_compare):
- 
+    def test_get_user_by_email_and_password_success(
+        self, mock_create_jwt, mock_compare
+    ):
+
         self.mock_user_repo.get_user_by_email.return_value = self.sample_user
         mock_compare.return_value = True
         mock_create_jwt.return_value = "fake_jwt_token"
 
         result = self.user_service.get_user_by_email_and_password(
-            email="test@example.com",
-            password="plaintextpassword"
+            email="test@example.com", password="plaintextpassword"
         )
 
-        self.mock_user_repo.get_user_by_email.assert_called_once_with("test@example.com")
-        mock_compare.assert_called_once_with("plaintextpassword", self.sample_user.password)
-        mock_create_jwt.assert_called_once_with(self.sample_user.id, self.sample_user.role, self.sample_user.email)
+        self.mock_user_repo.get_user_by_email.assert_called_once_with(
+            "test@example.com"
+        )
+        mock_compare.assert_called_once_with(
+            "plaintextpassword", self.sample_user.password
+        )
+        mock_create_jwt.assert_called_once_with(
+            self.sample_user.id, self.sample_user.role, self.sample_user.email
+        )
 
         self.assertEqual(result["token"], "fake_jwt_token")
         self.assertEqual(result["email"], self.sample_user.email)
@@ -59,25 +66,27 @@ class TestUserService(unittest.TestCase):
 
         with self.assertRaises(AppException) as ctx:
             self.user_service.get_user_by_email_and_password(
-                email="test@example.com",
-                password="wrongpassword"
+                email="test@example.com", password="wrongpassword"
             )
 
         self.assertEqual(ctx.exception.error_code, USER_001)
-        self.mock_user_repo.get_user_by_email.assert_called_once_with("test@example.com")
+        self.mock_user_repo.get_user_by_email.assert_called_once_with(
+            "test@example.com"
+        )
 
     def test_get_user_by_email_and_password_user_not_found(self):
-  
+
         self.mock_user_repo.get_user_by_email.side_effect = AppException(USER_005)
 
         with self.assertRaises(AppException) as ctx:
             self.user_service.get_user_by_email_and_password(
-                email="missing@example.com",
-                password="any"
+                email="missing@example.com", password="any"
             )
 
         self.assertEqual(ctx.exception.error_code, USER_005)
-        self.mock_user_repo.get_user_by_email.assert_called_once_with("missing@example.com")
+        self.mock_user_repo.get_user_by_email.assert_called_once_with(
+            "missing@example.com"
+        )
 
     @patch("app.service.user_service.generate_hash_from_password")
     def test_add_user_success(self, mock_hash):
@@ -86,7 +95,9 @@ class TestUserService(unittest.TestCase):
 
         self.user_service.add_user(self.sample_user)
 
-        self.mock_user_repo.get_user_by_email.assert_called_once_with(self.sample_user.email)
+        self.mock_user_repo.get_user_by_email.assert_called_once_with(
+            self.sample_user.email
+        )
         mock_hash.assert_called_once_with("hashedpassword")
         self.assertEqual(self.sample_user.password, "hashed_password")
         self.mock_user_repo.add_user.assert_called_once_with(self.sample_user)
@@ -102,7 +113,9 @@ class TestUserService(unittest.TestCase):
 
     def test_add_user_repo_unexpected_error(self):
 
-        self.mock_user_repo.get_user_by_email.side_effect = AppException("SOME_OTHER_ERROR")
+        self.mock_user_repo.get_user_by_email.side_effect = AppException(
+            "SOME_OTHER_ERROR"
+        )
 
         with self.assertRaises(AppException) as ctx:
             self.user_service.add_user(self.sample_user)

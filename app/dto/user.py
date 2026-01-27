@@ -6,9 +6,15 @@ import re
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$")
 MOBILE_REGEX = re.compile(r"^[6-9][0-9]{9}$")
 
+
 class LoginInput(BaseModel):
 
-    model_config = ConfigDict(populate_by_name=True, extra="forbid", str_strip_whitespace=True, validate_assignment=True)
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="forbid",
+        str_strip_whitespace=True,
+        validate_assignment=True,
+    )
 
     email: EmailStr = Field(alias="email")
     password: str = Field(alias="password")
@@ -17,14 +23,17 @@ class LoginInput(BaseModel):
     @classmethod
     def validate_password(cls, v: str):
         if not PASSWORD_REGEX.match(v):
-            raise ValueError(
-                "Invalid Details"
-            )
+            raise ValueError("Invalid Details")
         return v
-    
+
 
 class SignUpInput(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, extra="forbid", str_strip_whitespace=True, validate_assignment=True)
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="forbid",
+        str_strip_whitespace=True,
+        validate_assignment=True,
+    )
 
     email: EmailStr = Field(alias="email")
     password: str = Field(alias="password")
@@ -49,7 +58,7 @@ class SignUpInput(BaseModel):
                 "Password must contain uppercase, lowercase, digit, and special character"
             )
         return v
-    
+
     @field_validator("department", mode="before")
     @classmethod
     def handle_empty_department(cls, v):

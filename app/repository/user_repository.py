@@ -1,5 +1,5 @@
 from app.models.user import User
-from app.constants.constants import * 
+from app.constants.constants import *
 from app.errors.base_exception import AppException
 from app.models.user import User, UserRole, Department
 from typing import List
@@ -9,12 +9,10 @@ class UserRepository:
     def __init__(self, ddb_connection, deserializer, table_name):
         self.deserializer = deserializer()
         self.dynamodb = ddb_connection
-        self.table_name = table_name    
+        self.table_name = table_name
 
     def get_user_by_email(self, email: str) -> User:
-        statement = (
-            f"SELECT * FROM {self.table_name} WHERE PK = ?"
-        )
+        statement = f"SELECT * FROM {self.table_name} WHERE PK = ?"
 
         try:
             response = self.dynamodb.execute_statement(
@@ -37,8 +35,7 @@ class UserRepository:
         user: User = User.model_construct(**user_details)
 
         return user
-            
-            
+
     def add_user(self, new_user: User) -> None:
         statement = f"INSERT INTO {self.table_name} VALUE {{'PK': ?, 'SK': ?, 'id': ?, 'email': ?, 'name': ?, 'mobile': ?, 'password': ?, 'role': ?, 'department': ?}}"
 
@@ -56,41 +53,61 @@ class UserRepository:
                             {"S": new_user.mobile},
                             {"S": new_user.password},
                             {"S": new_user.role.value},
-                            {"S": str(new_user.department.value) if new_user.department else ""},
+                            {
+                                "S": (
+                                    str(new_user.department.value)
+                                    if new_user.department
+                                    else ""
+                                )
+                            },
                         ],
                     },
                     {
                         "Statement": statement,
                         "Parameters": [
                             {"S": ("ROLE#" + new_user.role.value.upper())},
-                            {"S": f"DEPARTMENT#{str(new_user.department.value)}#UUID#{new_user.id}" if new_user.department else f"UUID#{new_user.id}"},
+                            {
+                                "S": (
+                                    f"DEPARTMENT#{str(new_user.department.value)}#UUID#{new_user.id}"
+                                    if new_user.department
+                                    else f"UUID#{new_user.id}"
+                                )
+                            },
                             {"S": new_user.id},
                             {"S": new_user.email},
                             {"S": new_user.name},
                             {"S": new_user.mobile},
                             {"S": new_user.password},
                             {"S": new_user.role.value},
-                            {"S": str(new_user.department.value) if new_user.department else ""},
+                            {
+                                "S": (
+                                    str(new_user.department.value)
+                                    if new_user.department
+                                    else ""
+                                )
+                            },
                         ],
                     },
                 ],
             )
         except Exception:
             raise AppException(USER_006)
-        
 
-    def get_all_users_by_role(self, role: UserRole, department: Department | None = None, id: str | None = None) -> List[User]:
+    def get_all_users_by_role(
+        self,
+        role: UserRole,
+        department: Department | None = None,
+        id: str | None = None,
+    ) -> List[User]:
         try:
             if department is None:
                 response = self.dynamodb.execute_statement(
-                Statement=f"""
+                    Statement=f"""
                     SELECT * FROM {self.table_name}
                     WHERE PK = ?
                 """,
-                Parameters=[
-                    {"S": f"ROLE#{role.value.upper()}"}
-                ]
-            )
+                    Parameters=[{"S": f"ROLE#{role.value.upper()}"}],
+                )
             elif department is not None and id is not None:
                 response = self.dynamodb.execute_statement(
                     Statement=f"""
@@ -100,8 +117,8 @@ class UserRepository:
                     """,
                     Parameters=[
                         {"S": f"ROLE#{role.value.upper()}"},
-                        {"S": f"DEPARTMENT#{department.value}#UUID#{id}"}
-                    ]
+                        {"S": f"DEPARTMENT#{department.value}#UUID#{id}"},
+                    ],
                 )
             else:
                 response = self.dynamodb.execute_statement(
@@ -112,8 +129,8 @@ class UserRepository:
                     """,
                     Parameters=[
                         {"S": f"ROLE#{role.value.upper()}"},
-                        {"S": f"DEPARTMENT#{department.value}"}
-                    ]
+                        {"S": f"DEPARTMENT#{department.value}"},
+                    ],
                 )
         except:
             raise AppException(USER_007)
@@ -123,13 +140,12 @@ class UserRepository:
         users: List[User] = []
 
         for item in items:
-            user_details = {k: self.deserializer.deserialize(v) for k, v in item.items()}
-            
+            user_details = {
+                k: self.deserializer.deserialize(v) for k, v in item.items()
+            }
+
             user: User = User.model_construct(**user_details)
 
-            users.append(user) 
+            users.append(user)
 
-        return users  
-
-
-        
+        return users

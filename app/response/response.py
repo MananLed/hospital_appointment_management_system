@@ -2,6 +2,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import Any
 
+
 class Response:
 
     @classmethod
@@ -9,7 +10,11 @@ class Response:
 
         return JSONResponse(
             status_code=status_code,
-            content={"status": "Success", "message": message, "data": jsonable_encoder(data, by_alias=True)},
+            content={
+                "status": "Success",
+                "message": message,
+                "data": jsonable_encoder(data, by_alias=True),
+            },
         )
 
     @classmethod

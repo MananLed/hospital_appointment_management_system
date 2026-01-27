@@ -9,11 +9,13 @@ class UserRole(str, Enum):
     ROLERECEPTIONIST = "receptionist"
     ROLEPATIENT = "patient"
 
+
 class Department(str, Enum):
     CARDIOLOGY = "cardiology"
     NUEROLOGY = "nuerology"
     ENT = "ent"
     ORTHOPEDICS = "orthopedics"
+
 
 class User(BaseModel):
     model_config = ConfigDict(populate_by_name=True, str_strip_whitespace=True)

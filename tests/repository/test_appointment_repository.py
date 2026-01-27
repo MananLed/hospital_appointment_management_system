@@ -9,6 +9,7 @@ from app.constants.constants import *
 from uuid import uuid4
 from datetime import date
 
+
 class TestAppointmentRepository(unittest.TestCase):
 
     def setUp(self):
@@ -21,7 +22,7 @@ class TestAppointmentRepository(unittest.TestCase):
         self.repo = AppointmentRepository(
             ddb_connection=self.mock_ddb,
             deserializer=self.mock_deserializer,
-            table_name="AppointmentTable"
+            table_name="AppointmentTable",
         )
 
     def tearDown(self):
@@ -38,9 +39,9 @@ class TestAppointmentRepository(unittest.TestCase):
             ]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         departments = self.repo.get_all_departments()
 
@@ -68,17 +69,16 @@ class TestAppointmentRepository(unittest.TestCase):
             "Items": [
                 {"SK": {"S": "TIME#09:00"}},
                 {"SK": {"S": "TIME#10:30"}},
-                {"SK": {"S": "METADATA#SOMETHING"}}, 
+                {"SK": {"S": "METADATA#SOMETHING"}},
             ]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         result = self.repo.get_occupied_timeslots(
-            id=doctor_id,
-            appointment_date=appointment_date
+            id=doctor_id, appointment_date=appointment_date
         )
 
         self.assertEqual(result, ["09:00", "10:30"])
@@ -96,20 +96,17 @@ class TestAppointmentRepository(unittest.TestCase):
                 {
                     "S": f"DOCTOR#UUID#{str(doctor_id)}#DATE#{appointment_date.isoformat()}"
                 }
-            ]
+            ],
         )
 
     def test_get_occupied_timeslots_empty(self):
         doctor_id = uuid4()
         appointment_date = date.today()
 
-        self.mock_ddb.execute_statement.return_value = {
-            "Items": []
-        }
+        self.mock_ddb.execute_statement.return_value = {"Items": []}
 
         result = self.repo.get_occupied_timeslots(
-            id=doctor_id,
-            appointment_date=appointment_date
+            id=doctor_id, appointment_date=appointment_date
         )
 
         self.assertEqual(result, [])
@@ -122,8 +119,7 @@ class TestAppointmentRepository(unittest.TestCase):
 
         with self.assertRaises(AppException) as ctx:
             self.repo.get_occupied_timeslots(
-                id=doctor_id,
-                appointment_date=appointment_date
+                id=doctor_id, appointment_date=appointment_date
             )
 
         exc = ctx.exception
@@ -152,13 +148,12 @@ class TestAppointmentRepository(unittest.TestCase):
             ]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         result = self.repo.get_patient_appointments(
-            patient_id=patient_id,
-            appointment_date=appointment_date
+            patient_id=patient_id, appointment_date=appointment_date
         )
 
         self.assertEqual(len(result), 2)
@@ -177,17 +172,14 @@ class TestAppointmentRepository(unittest.TestCase):
             [
                 {"S": f"PATIENT#UUID#{patient_id}"},
                 {"S": f"DATE#{appointment_date.isoformat()}"},
-            ]
+            ],
         )
 
     def test_get_patient_appointments_empty(self):
-        self.mock_ddb.execute_statement.return_value = {
-            "Items": []
-        }
+        self.mock_ddb.execute_statement.return_value = {"Items": []}
 
         result = self.repo.get_patient_appointments(
-            patient_id="patient-123",
-            appointment_date=date(2024, 1, 15)
+            patient_id="patient-123", appointment_date=date(2024, 1, 15)
         )
 
         self.assertEqual(result, [])
@@ -198,12 +190,10 @@ class TestAppointmentRepository(unittest.TestCase):
 
         with self.assertRaises(AppException) as ctx:
             self.repo.get_patient_appointments(
-                patient_id="patient-123",
-                appointment_date=date(2024, 1, 15)
+                patient_id="patient-123", appointment_date=date(2024, 1, 15)
             )
 
         self.assertEqual(ctx.exception.error_code, APPOINTMENT_010)
-
 
     def _build_appointment(self):
         return MagicMock(
@@ -216,7 +206,7 @@ class TestAppointmentRepository(unittest.TestCase):
             doctor_id=str(uuid4()),
             patient_id=str(uuid4()),
             appointment_date=date(2024, 1, 15),
-            created_at=datetime(2024, 1, 10, 10, 0, 0)
+            created_at=datetime(2024, 1, 10, 10, 0, 0),
         )
 
     def test_book_appointment_success(self):
@@ -237,14 +227,11 @@ class TestAppointmentRepository(unittest.TestCase):
 
         error_response = {
             "Error": {"Code": "TransactionCanceledException"},
-            "CancellationReasons": [
-                {"Code": "ConditionalCheckFailed"}
-            ]
+            "CancellationReasons": [{"Code": "ConditionalCheckFailed"}],
         }
 
         self.mock_ddb.execute_transaction.side_effect = ClientError(
-            error_response=error_response,
-            operation_name="ExecuteTransaction"
+            error_response=error_response, operation_name="ExecuteTransaction"
         )
 
         with self.assertRaises(AppException) as ctx:
@@ -255,13 +242,10 @@ class TestAppointmentRepository(unittest.TestCase):
     def test_book_appointment_generic_ddb_error(self):
         appointment = self._build_appointment()
 
-        error_response = {
-            "Error": {"Code": "InternalServerError"}
-        }
+        error_response = {"Error": {"Code": "InternalServerError"}}
 
         self.mock_ddb.execute_transaction.side_effect = ClientError(
-            error_response=error_response,
-            operation_name="ExecuteTransaction"
+            error_response=error_response, operation_name="ExecuteTransaction"
         )
 
         with self.assertRaises(AppException) as ctx:
@@ -290,13 +274,12 @@ class TestAppointmentRepository(unittest.TestCase):
             ]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         result = self.repo.get_all_appointments_of_doctor(
-            id=doctor_id,
-            appointment_date=appointment_date
+            id=doctor_id, appointment_date=appointment_date
         )
 
         self.assertEqual(len(result), 2)
@@ -308,7 +291,11 @@ class TestAppointmentRepository(unittest.TestCase):
         args = self.mock_ddb.execute_statement.call_args.kwargs
         self.assertEqual(
             args["Parameters"],
-            [{"S": f"DOCTOR#UUID#{str(doctor_id)}#DATE#{appointment_date.isoformat()}"}]
+            [
+                {
+                    "S": f"DOCTOR#UUID#{str(doctor_id)}#DATE#{appointment_date.isoformat()}"
+                }
+            ],
         )
 
     def test_get_all_appointments_of_doctor_with_timeslot(self):
@@ -327,14 +314,12 @@ class TestAppointmentRepository(unittest.TestCase):
             ]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         result = self.repo.get_all_appointments_of_doctor(
-            id=doctor_id,
-            appointment_date=appointment_date,
-            timeslot=timeslot
+            id=doctor_id, appointment_date=appointment_date, timeslot=timeslot
         )
 
         self.assertEqual(len(result), 1)
@@ -346,9 +331,11 @@ class TestAppointmentRepository(unittest.TestCase):
         self.assertEqual(
             args["Parameters"],
             [
-                {"S": f"DOCTOR#UUID#{str(doctor_id)}#DATE#{appointment_date.isoformat()}"},
-                {"S": f"TIME#{timeslot}"}
-            ]
+                {
+                    "S": f"DOCTOR#UUID#{str(doctor_id)}#DATE#{appointment_date.isoformat()}"
+                },
+                {"S": f"TIME#{timeslot}"},
+            ],
         )
 
     def test_get_all_appointments_of_doctor_ddb_failure(self):
@@ -356,8 +343,7 @@ class TestAppointmentRepository(unittest.TestCase):
 
         with self.assertRaises(AppException) as ctx:
             self.repo.get_all_appointments_of_doctor(
-                id=uuid4(),
-                appointment_date=date(2024, 1, 15)
+                id=uuid4(), appointment_date=date(2024, 1, 15)
             )
 
         self.assertEqual(ctx.exception.error_code, APPOINTMENT_014)
@@ -382,9 +368,11 @@ class TestAppointmentRepository(unittest.TestCase):
         self.assertEqual(
             transact_statements[0]["Parameters"],
             [
-                {"S": f"DOCTOR#UUID#{appointment.doctor_id}#DATE#{appointment.appointment_date}"},
-                {"S": f"TIME#{appointment.timeslot}"}
-            ]
+                {
+                    "S": f"DOCTOR#UUID#{appointment.doctor_id}#DATE#{appointment.appointment_date}"
+                },
+                {"S": f"TIME#{appointment.timeslot}"},
+            ],
         )
 
         self.assertEqual(
@@ -398,8 +386,8 @@ class TestAppointmentRepository(unittest.TestCase):
                         f"#DOCTOR#UUID#{appointment.doctor_id}"
                         f"#TIME#{appointment.timeslot}"
                     )
-                }
-            ]
+                },
+            ],
         )
 
     def test_cancel_appointment_ddb_failure(self):
@@ -438,9 +426,11 @@ class TestAppointmentRepository(unittest.TestCase):
             transact_statements[0]["Parameters"],
             [
                 {"S": AppointmentStatus.COMPLETED.value},
-                {"S": f"DOCTOR#UUID#{appointment.doctor_id}#DATE#{appointment.appointment_date}"},
-                {"S": f"TIME#{appointment.timeslot}"}
-            ]
+                {
+                    "S": f"DOCTOR#UUID#{appointment.doctor_id}#DATE#{appointment.appointment_date}"
+                },
+                {"S": f"TIME#{appointment.timeslot}"},
+            ],
         )
 
         self.assertEqual(
@@ -455,8 +445,8 @@ class TestAppointmentRepository(unittest.TestCase):
                         f"#DOCTOR#UUID#{appointment.doctor_id}"
                         f"#TIME#{appointment.timeslot}"
                     )
-                }
-            ]
+                },
+            ],
         )
 
     def test_mark_appointment_complete_ddb_failure(self):
@@ -473,6 +463,3 @@ class TestAppointmentRepository(unittest.TestCase):
             self.repo.mark_appointment_complete(appointment)
 
         self.assertEqual(ctx.exception.error_code, APPOINTMENT_023)
-
-
-

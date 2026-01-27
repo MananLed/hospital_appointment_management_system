@@ -13,17 +13,14 @@ class TestAuthController(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
 
-        self.valid_payload = {
-            "email": "test@example.com",
-            "password": "Valid@123"
-        }
+        self.valid_payload = {"email": "test@example.com", "password": "Valid@123"}
 
         self.valid_signup_payload = {
             "email": "TEST@EXAMPLE.COM",
             "password": "Valid@123",
             "name": "Manan",
             "mobile": "9876543210",
-            "department": Department.CARDIOLOGY.value
+            "department": Department.CARDIOLOGY.value,
         }
 
     def tearDown(self):
@@ -34,7 +31,7 @@ class TestAuthController(unittest.TestCase):
         mock_user_service.get_user_by_email_and_password.return_value = {
             "token": "fake-token",
             "email": "test@example.com",
-            "role": "PATIENT"
+            "role": "PATIENT",
         }
 
         response = self.client.post("/auth/login", json=self.valid_payload)
@@ -47,14 +44,15 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["data"]["email"], "test@example.com")
 
         mock_user_service.get_user_by_email_and_password.assert_called_once_with(
-            "test@example.com",
-            "Valid@123"
+            "test@example.com", "Valid@123"
         )
 
     @patch("app.controller.auth_controller.user_service_instance")
     def test_login_invalid_credentials(self, mock_user_service):
 
-        mock_user_service.get_user_by_email_and_password.side_effect = AppException(USER_001)
+        mock_user_service.get_user_by_email_and_password.side_effect = AppException(
+            USER_001
+        )
 
         response = self.client.post("/auth/login", json=self.valid_payload)
 
@@ -65,10 +63,7 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["errorcode"], USER_001)
 
     def test_login_invalid_password_format(self):
-        payload = {
-            "email": "test@example.com",
-            "password": "simple123"
-        }
+        payload = {"email": "test@example.com", "password": "simple123"}
 
         response = self.client.post("/auth/login", json=payload)
 
@@ -79,9 +74,7 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["errorcode"], SYS_001)
 
     def test_login_missing_password(self):
-        payload = {
-            "email": "test@example.com"
-        }
+        payload = {"email": "test@example.com"}
 
         response = self.client.post("/auth/login", json=payload)
 
@@ -95,7 +88,7 @@ class TestAuthController(unittest.TestCase):
         payload = {
             "email": "test@example.com",
             "password": "Valid@123",
-            "username": "hacker"
+            "username": "hacker",
         }
 
         response = self.client.post("/auth/login", json=payload)
@@ -120,7 +113,7 @@ class TestAuthController(unittest.TestCase):
         mock_user_service.add_user.assert_called_once()
 
         user_arg = mock_user_service.add_user.call_args[0][0]
-        self.assertEqual(user_arg.email, "test@example.com")  
+        self.assertEqual(user_arg.email, "test@example.com")
         self.assertEqual(user_arg.name, "Manan")
         self.assertEqual(user_arg.mobile, "9876543210")
         self.assertIsNone(user_arg.department)
@@ -138,10 +131,7 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["errorcode"], USER_002)
 
     def test_signup_invalid_password(self):
-        payload = {
-            **self.valid_signup_payload,
-            "password": "simple123"
-        }
+        payload = {**self.valid_signup_payload, "password": "simple123"}
 
         response = self.client.post("/auth/signup", json=payload)
 
@@ -152,10 +142,7 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["errorcode"], SYS_001)
 
     def test_signup_invalid_mobile(self):
-        payload = {
-            **self.valid_signup_payload,
-            "mobile": "123"
-        }
+        payload = {**self.valid_signup_payload, "mobile": "123"}
 
         response = self.client.post("/auth/signup", json=payload)
 
@@ -169,7 +156,7 @@ class TestAuthController(unittest.TestCase):
         payload = {
             "email": "test@example.com",
             "password": "Valid@123",
-            "mobile": "9876543210"
+            "mobile": "9876543210",
         }
 
         response = self.client.post("/auth/signup", json=payload)
@@ -181,10 +168,7 @@ class TestAuthController(unittest.TestCase):
         self.assertEqual(body["errorcode"], SYS_001)
 
     def test_signup_extra_field(self):
-        payload = {
-            **self.valid_signup_payload,
-            "role": "ADMIN"
-        }
+        payload = {**self.valid_signup_payload, "role": "ADMIN"}
 
         response = self.client.post("/auth/signup", json=payload)
 
@@ -196,10 +180,7 @@ class TestAuthController(unittest.TestCase):
 
     @patch("app.controller.auth_controller.user_service_instance")
     def test_signup_empty_department(self, mock_user_service):
-        payload = {
-            **self.valid_signup_payload,
-            "department": ""
-        }
+        payload = {**self.valid_signup_payload, "department": ""}
 
         response = self.client.post("/auth/signup", json=payload)
 
@@ -207,7 +188,3 @@ class TestAuthController(unittest.TestCase):
 
         user_arg = mock_user_service.add_user.call_args[0][0]
         self.assertIsNone(user_arg.department)
-
-
-    
-

@@ -1,7 +1,8 @@
 from enum import Enum
 from pydantic import BaseModel, Field, EmailStr, field_validator, ConfigDict
 from datetime import datetime, timezone, date
-from uuid import UUID, uuid4 
+from uuid import uuid4
+
 
 class AppointmentStatus(str, Enum):
     BOOKED = "booked"
@@ -22,7 +23,9 @@ class Appointment(BaseModel):
     doctor_id: str = Field(alias="doctor_id")
     patient_id: str = Field(alias="patient_id")
     appointment_date: date = Field(alias="date")
-    created_at: datetime = Field(alias="created_at", default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        alias="created_at", default_factory=lambda: datetime.now(timezone.utc)
+    )
 
     @field_validator("appointment_date", mode="before")
     @classmethod

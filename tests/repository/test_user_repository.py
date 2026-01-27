@@ -1,8 +1,9 @@
-import unittest 
+import unittest
 from unittest.mock import MagicMock
 from app.repository.user_repository import UserRepository
 from app.errors.base_exception import AppException
 from app.constants.constants import *
+
 
 class TestUserRepository(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class TestUserRepository(unittest.TestCase):
         self.repo = UserRepository(
             ddb_connection=self.mock_ddb,
             deserializer=self.mock_deserializer,
-            table_name="UserTable"
+            table_name="UserTable",
         )
 
     def tearDown(self):
@@ -29,32 +30,25 @@ class TestUserRepository(unittest.TestCase):
         email = "test@example.com"
 
         self.mock_ddb.execute_statement.return_value = {
-            "Items": [
-                {
-                    "email": {"S": email},
-                    "name": {"S": "Manan"}
-                }
-            ]
+            "Items": [{"email": {"S": email}, "name": {"S": "Manan"}}]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda attr: list(attr.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda attr: list(
+            attr.values()
+        )[0]
 
         user = self.repo.get_user_by_email(email)
 
         self.mock_ddb.execute_statement.assert_called_once_with(
             Statement="SELECT * FROM UserTable WHERE PK = ?",
-            Parameters=[{"S": "USERS#EMAIL#" + email}]
+            Parameters=[{"S": "USERS#EMAIL#" + email}],
         )
 
         self.assertEqual(user.email, email)
         self.assertEqual(user.name, "Manan")
 
     def test_get_user_by_email_user_not_found(self):
-        self.mock_ddb.execute_statement.return_value = {
-            "Items": []
-        }
+        self.mock_ddb.execute_statement.return_value = {"Items": []}
 
         with self.assertRaises(AppException) as ctx:
             self.repo.get_user_by_email("missing@example.com")
@@ -121,10 +115,7 @@ class TestUserRepository(unittest.TestCase):
         self.assertEqual(exc.error_code, USER_006)
 
     def _mock_ddb_user_item(self, email="test@example.com"):
-        return {
-            "email": {"S": email},
-            "name": {"S": "Manan"}
-        }
+        return {"email": {"S": email}, "name": {"S": "Manan"}}
 
     def test_get_all_users_by_role_without_department(self):
 
@@ -135,9 +126,9 @@ class TestUserRepository(unittest.TestCase):
             "Items": [self._mock_ddb_user_item()]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         users = self.repo.get_all_users_by_role(role)
 
@@ -159,14 +150,12 @@ class TestUserRepository(unittest.TestCase):
             "Items": [self._mock_ddb_user_item("doc@example.com")]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
         users = self.repo.get_all_users_by_role(
-            role=role,
-            department=department,
-            id=user_id
+            role=role, department=department, id=user_id
         )
 
         self.assertEqual(len(users), 1)
@@ -176,7 +165,7 @@ class TestUserRepository(unittest.TestCase):
         self.assertIn("begins_with", call_args["Statement"])
 
     def test_get_all_users_by_role_with_department_only(self):
-  
+
         role = MagicMock()
         role.value = "receptionist"
 
@@ -187,21 +176,17 @@ class TestUserRepository(unittest.TestCase):
             "Items": [self._mock_ddb_user_item("receptionist@example.com")]
         }
 
-        self.mock_deserializer_instance.deserialize.side_effect = (
-            lambda v: list(v.values())[0]
-        )
+        self.mock_deserializer_instance.deserialize.side_effect = lambda v: list(
+            v.values()
+        )[0]
 
-        users = self.repo.get_all_users_by_role(
-            role=role,
-            department=department
-        )
+        users = self.repo.get_all_users_by_role(role=role, department=department)
 
         self.assertEqual(len(users), 1)
         self.assertEqual(users[0].email, "receptionist@example.com")
 
         call_args = self.mock_ddb.execute_statement.call_args[1]
         self.assertIn("begins_with", call_args["Statement"])
-
 
     def test_get_all_users_by_role_ddb_failure(self):
 

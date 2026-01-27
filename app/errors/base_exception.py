@@ -11,10 +11,8 @@ class AppException(HTTPException):
             error_code: str = SYS_001
             error_def: ErrorDefinition = ERROR_REGISTRY.get(error_code)
 
-        
         super().__init__(
-            status_code=error_def.http_status,
-            detail=message or error_def.message
+            status_code=error_def.http_status, detail=message or error_def.message
         )
 
         self.error_code = error_code
